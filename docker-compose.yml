@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cafe-rating
+    ports:
+      - "5432:5432"
+    volumes:
+      - cafehop-data:/var/lib/postgresql/data
+
+volumes:
+  cafehop-data:
