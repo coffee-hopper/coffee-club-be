@@ -1,4 +1,13 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  // OneToMany,
+  // Collection,
+  Unique,
+} from '@mikro-orm/core';
+// import { Rating } from './rating.entity';
+// import { Comment } from './comment.entity';
 
 @Entity()
 export class User {
@@ -6,11 +15,24 @@ export class User {
   id!: number;
 
   @Property()
+  @Unique()
   username!: string;
 
-  @Property()
-  password!: string;
+  @Property({ nullable: true })
+  password?: string;
+
+  @Property({ nullable: true })
+  googleId?: string;
+
+  @Property({ nullable: true })
+  googleEmail?: string;
 
   @Property()
   role!: string;
+
+  // @OneToMany(() => Rating, (rating) => rating.user)
+  // ratings = new Collection<Rating>(this);
+
+  // @OneToMany(() => Comment, (comment) => comment.user)
+  // comments = new Collection<Comment>(this);
 }
