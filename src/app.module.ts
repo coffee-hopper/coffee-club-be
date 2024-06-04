@@ -3,13 +3,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import mikroOrmConfig from 'src/mikro-orm.config';
-import { User } from './entities/user.entity';
+import { UsersModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [
-    MikroOrmModule.forRoot(mikroOrmConfig),
-    MikroOrmModule.forFeature([User]),
-  ],
+  imports: [MikroOrmModule.forRoot(mikroOrmConfig), UsersModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
