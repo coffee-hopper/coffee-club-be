@@ -1,33 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { UserRepository } from './user.repository';
 import { User } from '../entities/user.entity';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityRepository, EntityManager } from '@mikro-orm/core';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
     @InjectRepository(User)
-    private userRepository: UserRepository,
+    private readonly userRepository: EntityRepository<User>,
     private readonly em: EntityManager,
   ) {}
 
-  async findOneByUsername(username: string): Promise<User | undefined> {
-    return this.userRepository.findOne({ username });
-  }
-
-  async findOneByGoogleId(googleId: string): Promise<User | undefined> {
+  async findByGoogleId(googleId: string) {
     return this.userRepository.findOne({ googleId });
   }
 
-  async createUserWithGoogle(
-    googleId: string,
-    googleEmail: string,
-  ): Promise<User> {
-    const user = new User();
-    user.googleId = googleId;
-    user.googleEmail = googleEmail;
-    user.role = 'user'; // Default role
+  async findByEmail(email: string) {
+    return this.userRepository.findOne({
+      $or: [{ email }, { googleEmail: email }],
+    });
+  }
+
+  async findByUsername(username: string) {
+    return this.userRepository.findOne({ username });
+  }
+
+  async create(userData: Partial<User>) {
+    const user = this.userRepository.create(userData);
     await this.em.persistAndFlush(user);
     return user;
   }

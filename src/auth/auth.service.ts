@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from '../user/user.service';
+import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
+    private userService: UserService,
     private jwtService: JwtService,
   ) {}
 
@@ -18,17 +18,20 @@ export class AuthService {
   //   return null;
   // }
 
-  async validateGoogleUser(
-    googleId: string,
-    googleEmail: string,
-  ): Promise<any> {
-    let user = await this.usersService.findOneByGoogleId(googleId);
+  async validateGoogleUser(googleId: string, email: string) {
+    const username = email.split('@')[0]; // Use email prefix as username
+    const user = await this.userService.findByGoogleId(googleId);
+
     if (!user) {
-      user = await this.usersService.createUserWithGoogle(
+      // Create new user if not exists
+      return this.userService.create({
+        username,
         googleId,
-        googleEmail,
-      );
+        googleEmail: email,
+        role: 'user',
+      });
     }
+
     return user;
   }
 
