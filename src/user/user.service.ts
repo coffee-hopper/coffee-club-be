@@ -25,6 +25,10 @@ export class UserService {
     return this.userRepository.findOne({ username });
   }
 
+  async findByPhone(phone: string) {
+    return this.userRepository.findOne({ phone });
+  }
+
   async create(userData: Partial<User>) {
     const user = this.userRepository.create(userData);
     await this.em.persistAndFlush(user);

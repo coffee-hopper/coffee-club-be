@@ -7,6 +7,9 @@ import { UsersModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 // import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './auth.controller';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { OTP } from 'src/entities/otp.entity';
+import { OTPService } from 'src/otp/otp.service';
 
 @Module({
   imports: [
@@ -16,9 +19,10 @@ import { AuthController } from './auth.controller';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '60m' },
     }),
+    MikroOrmModule.forFeature([OTP]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy],
+  providers: [AuthService, GoogleStrategy, OTPService],
   exports: [AuthService],
 })
 export class AuthModule {}
