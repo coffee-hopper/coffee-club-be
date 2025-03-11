@@ -19,46 +19,64 @@ export class OTPService {
     );
   }
 
-  generateOTP(): string {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  }
-
   async createOTP(phone: string): Promise<OTP> {
     const formattedPhone = this.formatPhoneNumber(phone);
 
-    // Generate new OTP
-    const code = this.generateOTP();
-    const otp = this.otpRepository.create({
-      phone: formattedPhone,
-      code,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes expiry
-      isUsed: false,
-    });
+    try {
+      // Start verification
+      await this.twilio.verify.v2
+        .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+        .verifications.create({
+          to: formattedPhone,
+          channel: 'sms',
+        });
 
-    await this.em.persistAndFlush(otp);
+      // Create OTP record
+      const otp = this.otpRepository.create({
+        phone: formattedPhone,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes expiry
+        isUsed: false,
+      });
 
-    await this.sendSMS(formattedPhone, code);
-
-    return otp;
+      await this.em.persistAndFlush(otp);
+      return otp;
+    } catch (error) {
+      console.error('Error sending verification:', error);
+      throw new Error('Failed to send verification code');
+    }
   }
 
   async verifyOTP(phone: string, code: string): Promise<boolean> {
     const formattedPhone = this.formatPhoneNumber(phone);
 
-    const otp = await this.otpRepository.findOne({
-      phone: formattedPhone,
-      code,
-      isUsed: false,
-      expiresAt: { $gt: new Date() },
-    });
+    try {
+      const verification = await this.twilio.verify.v2
+        .services(process.env.TWILIO_VERIFY_SERVICE_SID)
+        .verificationChecks.create({
+          to: formattedPhone,
+          code,
+        });
 
-    if (!otp) {
+      if (verification.status === 'approved') {
+        // Mark OTP as used
+        const otp = await this.otpRepository.findOne({
+          phone: formattedPhone,
+          isUsed: false,
+        });
+
+        if (otp) {
+          otp.isUsed = true;
+          await this.em.persistAndFlush(otp);
+        }
+
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Error verifying code:', error);
       return false;
     }
-
-    otp.isUsed = true;
-    await this.em.persistAndFlush(otp);
-    return true;
   }
 
   private formatPhoneNumber(phone: string): string {
@@ -69,18 +87,5 @@ export class OTPService {
     }
 
     return '+' + cleaned;
-  }
-
-  private async sendSMS(phone: string, code: string) {
-    try {
-      await this.twilio.messages.create({
-        body: `Your CafeHop verification code is: ${code}`,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: phone,
-      });
-    } catch (error) {
-      console.error('Error sending SMS:', error);
-      throw new Error('Failed to send SMS');
-    }
   }
 }

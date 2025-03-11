@@ -9,9 +9,6 @@ export class OTP {
   phone!: string;
 
   @Property()
-  code!: string;
-
-  @Property()
   expiresAt!: Date;
 
   @Property()
