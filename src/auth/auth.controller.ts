@@ -15,9 +15,10 @@ export class AuthController {
   async googleAuthRedirect(@Req() req, @Res() res) {
     try {
       const user = req.user;
-      // Redirect to your React app with the user data
+      const token = await this.authService.generateToken(user);
+      // Redirect to your React app with the token and user data
       return res.redirect(
-        `http://localhost:5173?user=${encodeURIComponent(JSON.stringify(user))}`,
+        `http://localhost:5173?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`,
       );
     } catch (error) {
       // Redirect with error

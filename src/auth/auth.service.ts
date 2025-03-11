@@ -41,4 +41,23 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
+
+  async findOrCreateUserByPhone(phone: string) {
+    let user = await this.userService.findByPhone(phone);
+
+    if (!user) {
+      user = await this.userService.create({
+        username: `user${Date.now()}`, // temporary username
+        phone,
+        role: 'user',
+      });
+    }
+
+    return user;
+  }
+
+  async generateToken(user: any) {
+    const payload = { username: user.username, sub: user.id };
+    return this.jwtService.sign(payload);
+  }
 }
