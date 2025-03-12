@@ -1,0 +1,113 @@
+{
+	"info": {
+		"_postman_id": "b4f3b0d1-5b3a-4b1c-8d1a-9b9b9b9b9b9b",
+		"name": "Cafe Hop Auth",
+		"description": "Authentication endpoints for Cafe Hop API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Google Auth",
+			"item": [
+				{
+					"name": "Google OAuth Login",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/google",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "google"]
+						},
+						"description": "Initiates Google OAuth flow"
+					}
+				},
+				{
+					"name": "Google OAuth Callback",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/google/callback",
+							"host": ["{{baseUrl}}"],
+							"path": ["auth", "google", "callback"]
+						},
+						"description": "Callback URL for Google OAuth"
+					}
+				}
+			]
+		},
+		{
+			"name": "Phone Auth",
+			"item": [
+				{
+					"name": "Request OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5551234567\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/otp/request",
+							"host": ["{{baseUrl}}"],
+							"path": ["otp", "request"]
+						},
+						"description": "Request OTP verification code"
+					}
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5551234567\",\n    \"code\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/otp/verify",
+							"host": ["{{baseUrl}}"],
+							"path": ["otp", "verify"]
+						},
+						"description": "Verify OTP code and get JWT token"
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [""]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [""]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+} 

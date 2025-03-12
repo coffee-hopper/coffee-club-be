@@ -15,6 +15,9 @@ export class User {
   email?: string;
 
   @Property({ nullable: true })
+  phone?: string;
+
+  @Property({ nullable: true })
   googleId?: string;
 
   @Property({ nullable: true })
