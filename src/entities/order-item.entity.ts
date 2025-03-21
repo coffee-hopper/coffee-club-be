@@ -1,4 +1,5 @@
 import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
+
 import { Order } from './order.entity';
 import { Product } from './product.entity';
 

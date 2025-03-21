@@ -1,4 +1,3 @@
-// src/entities/order.entity.ts
 import {
   Entity,
   PrimaryKey,
@@ -7,6 +6,7 @@ import {
   OneToMany,
   OneToOne,
 } from '@mikro-orm/core';
+
 import { User } from './user.entity';
 import { OrderItem } from './order-item.entity';
 import { Payment } from './payment.entity';

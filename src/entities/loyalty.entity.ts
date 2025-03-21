@@ -1,5 +1,7 @@
 import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
+
 import { User } from './user.entity';
+import { Product } from './product.entity';
 
 @Entity()
 export class Loyalty {
@@ -8,6 +10,9 @@ export class Loyalty {
 
   @ManyToOne(() => User)
   user!: User;
+
+  @ManyToOne(() => Product)
+  product!: Product;
 
   @Property()
   points!: number;
