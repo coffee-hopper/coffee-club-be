@@ -14,23 +14,11 @@ export class LoyaltyController {
 
   @Post()
   add(@Body() data: Partial<Loyalty>): Promise<Loyalty> {
-    return this.loyaltyService.addPoints(data);
+    return this.loyaltyService.addEntry(data);
   }
 
-  //WILL BE EDITED
-  // @Get('user/:id')
-  // getUserPoints(@Param('id') userId: string): Promise<number> {
-  //   return this.loyaltyService.getUserPoints(Number(userId));
-  // }
-
-  @Get('user/:userId/product/:productId')
-  getUserProductPoints(
-    @Param('userId') userId: string,
-    @Param('productId') productId: string,
-  ): Promise<number> {
-    return this.loyaltyService.getUserProductPoints(
-      Number(userId),
-      Number(productId),
-    );
+  @Get('user/:userId/stars')
+  getUserStars(@Param('userId') userId: string) {
+    return this.loyaltyService.getUserStars(Number(userId));
   }
 }

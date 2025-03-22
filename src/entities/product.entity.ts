@@ -9,6 +9,9 @@ export class Product {
   name!: string;
 
   @Property()
+  category: 'drink' | 'food' | 'snack' | 'accessory' = 'drink';
+
+  @Property()
   description?: string;
 
   @Property()
@@ -16,6 +19,9 @@ export class Product {
 
   @Property()
   stockQuantity!: number;
+
+  @Property({ default: 1 })
+  loyaltyMultiplier!: number;
 
   @Property({ onCreate: () => new Date() })
   createdAt: Date = new Date();

@@ -15,11 +15,11 @@ export class Loyalty {
   product!: Product;
 
   @Property()
-  points!: number;
-
-  @Property()
-  note?: string;
+  points: number = 1;
 
   @Property({ onCreate: () => new Date() })
   earnedAt: Date = new Date();
+
+  @Property({ nullable: true })
+  note?: string;
 }

@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { EntityRepository, EntityManager } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
+
 import { Order } from '../entities/order.entity';
 import { Product } from '../entities/product.entity';
 import { OrderItem } from '../entities/order-item.entity';

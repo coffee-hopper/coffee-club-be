@@ -16,21 +16,22 @@ export class LoyaltyService {
     return this.loyaltyRepo.findAll({ populate: ['user', 'product'] });
   }
 
-  async addPoints(data: Partial<Loyalty>): Promise<Loyalty> {
-    const record = this.loyaltyRepo.create(data);
-    await this.em.persistAndFlush(record);
-    return record;
+  async addEntry(data: Partial<Loyalty>): Promise<Loyalty> {
+    const entry = this.loyaltyRepo.create(data);
+    await this.em.persistAndFlush(entry);
+    return entry;
   }
 
-  async getUserProductPoints(
-    userId: number,
-    productId: number,
-  ): Promise<number> {
-    const entries = await this.loyaltyRepo.find({
-      user: userId,
-      product: productId,
-    });
+  async getUserStars(userId: number): Promise<{
+    stars: number;
+    rewards: number;
+    remainingToNext: number;
+  }> {
+    const entries = await this.loyaltyRepo.find({ user: userId });
+    const stars = entries.reduce((sum, e) => sum + e.points, 0);
+    const rewards = Math.floor(stars / 15);
+    const remainingToNext = 15 - (stars % 15);
 
-    return entries.reduce((sum, entry) => sum + entry.points, 0);
+    return { stars, rewards, remainingToNext };
   }
 }

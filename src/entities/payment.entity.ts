@@ -17,10 +17,10 @@ export class Payment {
   amount!: number;
 
   @Property()
-  paymentMethod!: string; // ex: 'iyzico', 'cash'
+  paymentMethod!: string; // 'iyzico', 'cash'
 
   @Property()
-  status!: string; // ex: 'success', 'failed'
+  status!: string; // 'success', 'failed'
 
   @Property({ onCreate: () => new Date() })
   paidAt: Date = new Date();
