@@ -1,113 +1,357 @@
 {
-	"info": {
-		"_postman_id": "b4f3b0d1-5b3a-4b1c-8d1a-9b9b9b9b9b9b",
-		"name": "Cafe Hop Auth",
-		"description": "Authentication endpoints for Cafe Hop API",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Google Auth",
-			"item": [
-				{
-					"name": "Google OAuth Login",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/auth/google",
-							"host": ["{{baseUrl}}"],
-							"path": ["auth", "google"]
-						},
-						"description": "Initiates Google OAuth flow"
-					}
-				},
-				{
-					"name": "Google OAuth Callback",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/auth/google/callback",
-							"host": ["{{baseUrl}}"],
-							"path": ["auth", "google", "callback"]
-						},
-						"description": "Callback URL for Google OAuth"
-					}
-				}
-			]
-		},
-		{
-			"name": "Phone Auth",
-			"item": [
-				{
-					"name": "Request OTP",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"phone\": \"5551234567\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/otp/request",
-							"host": ["{{baseUrl}}"],
-							"path": ["otp", "request"]
-						},
-						"description": "Request OTP verification code"
-					}
-				},
-				{
-					"name": "Verify OTP",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"phone\": \"5551234567\",\n    \"code\": \"123456\"\n}"
-						},
-						"url": {
-							"raw": "{{baseUrl}}/otp/verify",
-							"host": ["{{baseUrl}}"],
-							"path": ["otp", "verify"]
-						},
-						"description": "Verify OTP code and get JWT token"
-					}
-				}
-			]
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [""]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [""]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "baseUrl",
-			"value": "http://localhost:3000",
-			"type": "string"
-		}
-	]
-} 
+  "info": {
+    "_postman_id": "b4f3b0d1-5b3a-4b1c-8d1a-9b9b9b9b9b9b",
+    "name": "Cafe Hop Auth",
+    "description": "Authentication endpoints for Cafe Hop API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Google Auth",
+      "item": [
+        {
+          "name": "Google OAuth Login",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/google",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "google"]
+            },
+            "description": "Initiates Google OAuth flow"
+          }
+        },
+        {
+          "name": "Google OAuth Callback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/google/callback",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "google", "callback"]
+            },
+            "description": "Callback URL for Google OAuth"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Phone Auth",
+      "item": [
+        {
+          "name": "Request OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"5551234567\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/otp/request",
+              "host": ["{{baseUrl}}"],
+              "path": ["otp", "request"]
+            },
+            "description": "Request OTP verification code"
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phone\": \"5551234567\",\n    \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/otp/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["otp", "verify"]
+            },
+            "description": "Verify OTP code and get JWT token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Flat White\",\n  \"category\": \"drink\",\n  \"description\": \"Creamy coffee with milk\",\n  \"price\": 7,\n  \"stockQuantity\": 50\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "Create a new product (e.g., coffee or snack)"
+          }
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "Retrieve all products"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": 1,\n  \"items\": [\n    { \"product\": { \"id\": 1 }, \"quantity\": 2, \"price\": 5 },\n    { \"product\": { \"id\": 2 }, \"quantity\": 1, \"price\": 7 }\n  ],\n  \"totalAmount\": 17,\n  \"status\": \"pending\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            },
+            "description": "Create a new order with associated order items"
+          }
+        },
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            },
+            "description": "Fetch all orders with items and user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "OrderItem",
+      "item": [
+        {
+          "name": "Get All Order Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/order-items",
+              "host": ["{{baseUrl}}"],
+              "path": ["order-items"]
+            },
+            "description": "Returns all order items with product and order details. Creation is handled via OrderService — do not use POST here."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment",
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order\": 1,\n  \"iyzicoTransactionId\": \"txn_abc123\",\n  \"amount\": 17,\n  \"paymentMethod\": \"cash\",\n  \"status\": \"success\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments"]
+            },
+            "description": "💳 Creates a payment linked to an order. Automatically updates loyalty + creates invoice."
+          }
+        },
+        {
+          "name": "Get All Payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments"]
+            },
+            "description": "🧾 Returns all payments with linked order."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invoice",
+      "item": [
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order\": { \"id\": 3 },\n  \"billingAddress\": \"User 1 - Some Street\",\n  \"totalAmount\": 17\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices"]
+            },
+            "description": "Create a new invoice for a given order"
+          }
+        },
+        {
+          "name": "Get All Invoices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices"]
+            },
+            "description": "Fetch all invoices"
+          }
+        },
+        {
+          "name": "Get Invoice by Order ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/order/2",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "order", "2"]
+            },
+            "description": "Get invoice for a specific order"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loyalty",
+      "item": [
+        {
+          "name": "Add Loyalty Entry (manual)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": 1,\n  \"product\": 1,\n  \"points\": 1,\n  \"note\": \"Manually granted loyalty point\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/loyalty",
+              "host": ["{{baseUrl}}"],
+              "path": ["loyalty"]
+            },
+            "description": "Add a manual loyalty point (for testing or admin use)"
+          }
+        },
+        {
+          "name": "Get All Loyalty Entries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/loyalty",
+              "host": ["{{baseUrl}}"],
+              "path": ["loyalty"]
+            },
+            "description": "Retrieve all loyalty entries across all users and products"
+          }
+        },
+        {
+          "name": "Get User Stars",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/loyalty/user/1/stars",
+              "host": ["{{baseUrl}}"],
+              "path": ["loyalty", "user", "1", "stars"]
+            },
+            "description": "Get loyalty star progress for a user (stars, rewards, and how many more needed)"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
