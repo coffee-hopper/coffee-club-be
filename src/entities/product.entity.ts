@@ -11,7 +11,7 @@ export class Product {
   @Property()
   category: 'drink' | 'food' | 'snack' | 'accessory' = 'drink';
 
-  @Property()
+  @Property({ nullable: true })
   description?: string;
 
   @Property()

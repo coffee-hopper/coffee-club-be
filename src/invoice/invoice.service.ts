@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 
 import { Invoice } from '../entities/invoice.entity';
@@ -17,7 +17,21 @@ export class InvoiceService {
   }
 
   async create(data: Partial<Invoice>): Promise<Invoice> {
-    const invoice = this.invoiceRepo.create(data);
+    if (!data.order || typeof data.order === 'number') {
+      throw new BadRequestException('Order must be provided with ID');
+    }
+
+    if (!data.billingAddress || !data.totalAmount) {
+      throw new BadRequestException('Missing required invoice fields');
+    }
+
+    const orderRef = this.em.getReference('Order', data.order.id);
+
+    const invoice = this.invoiceRepo.create({
+      ...data,
+      order: orderRef,
+    });
+
     await this.em.persistAndFlush(invoice);
     return invoice;
   }
