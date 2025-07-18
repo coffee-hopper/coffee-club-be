@@ -1,4 +1,5 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { ProductCategory } from '../constants/product-category';
 
 @Entity()
 export class Product {
@@ -9,7 +10,10 @@ export class Product {
   name!: string;
 
   @Property()
-  category: 'drink' | 'food' | 'snack' | 'accessory' = 'drink';
+  imageName!: string;
+
+  @Property()
+  category: ProductCategory = 'coffee';
 
   @Property({ nullable: true })
   description?: string;

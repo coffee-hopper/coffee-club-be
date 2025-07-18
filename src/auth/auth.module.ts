@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
-// import { LocalStrategy } from './local.strategy';
+
 import { GoogleStrategy } from './google.strategy';
+import { JwtStrategy } from './jwt.strategy';
 import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from '../user/user.module';
 import { JwtModule } from '@nestjs/jwt';
-// import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './auth.controller';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { OTP } from 'src/entities/otp.entity';
@@ -27,7 +27,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     MikroOrmModule.forFeature([OTP]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy, OTPService],
+  providers: [AuthService, GoogleStrategy, OTPService, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

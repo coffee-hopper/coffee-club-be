@@ -9,9 +9,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     console.log('process.env.GOOGLE_CLIENT_ID', process.env.GOOGLE_CLIENT_ID);
 
     super({
-      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientID: process.env.GOOGLE_CLIENT_ID_WEB,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL, //TODO: change this to your domain
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
       scope: ['email', 'profile'],
     });
   }
@@ -22,8 +22,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback,
   ): Promise<any> {
-    const { id, emails } = profile;
-    const user = await this.authService.validateGoogleUser(id, emails[0].value);
+    const { id, emails, photos } = profile;
+    const user = await this.authService.validateGoogleUser(
+      id,
+      emails[0].value,
+      photos?.[0]?.value,
+    );
     if (!user) {
       throw new UnauthorizedException();
     }

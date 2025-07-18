@@ -5,55 +5,60 @@ import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AuthService {
-  private googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
 
-  // async validateUser(username: string, pass: string): Promise<any> {
-  //   const user = await this.usersService.findOneByUsername(username);
-  //   if (user && user.password === pass) {
-  //     const { password, ...result } = user;
-  //     return result;
-  //   }
-  //   return null;
-  // }
-
-  async validateGoogleUser(googleId: string, email: string) {
-    const username = email.split('@')[0]; // Use email prefix as username
+  async validateGoogleUser(googleId: string, email: string, picture?: string) {
+    const username = email.split('@')[0];
     const user = await this.userService.findByGoogleId(googleId);
 
     if (!user) {
-      // Create new user if not exists
       return this.userService.create({
         username,
         googleId,
         googleEmail: email,
+        googlePicture: picture,
         role: 'user',
       });
+    }
+
+    if (picture && user.googlePicture !== picture) {
+      await this.userService.update(user.id, { googlePicture: picture });
+      user.googlePicture = picture;
     }
 
     return user;
   }
 
-  async verifyGoogleToken(idToken: string) {
+  async verifyGoogleToken(idToken: string, isMobile = false) {
     try {
-      const ticket = await this.googleClient.verifyIdToken({
-        idToken,
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
+      const audience = isMobile
+        ? process.env.GOOGLE_CLIENT_ID_MOBILE
+        : process.env.GOOGLE_CLIENT_ID_WEB;
+
+      const client = new OAuth2Client(); // instantiate without preset clientId
+      const ticket = await client.verifyIdToken({ idToken, audience });
 
       const payload = ticket.getPayload();
       if (!payload) {
         throw new UnauthorizedException('Invalid Google Token');
       }
 
-      return this.validateGoogleUser(payload.sub, payload.email);
+      return this.validateGoogleUser(
+        payload.sub,
+        payload.email,
+        payload.picture,
+      );
     } catch (error) {
       throw new UnauthorizedException('Failed to verify Google Token');
     }
+  }
+
+  async generateToken(user: any) {
+    const payload = { username: user.username, sub: user.id, role: user.role };
+    return this.jwtService.sign(payload);
   }
 
   async login(user: any) {
@@ -68,17 +73,12 @@ export class AuthService {
 
     if (!user) {
       user = await this.userService.create({
-        username: `user${Date.now()}`, // temporary username
+        username: `user${Date.now()}`,
         phone,
         role: 'user',
       });
     }
 
     return user;
-  }
-
-  async generateToken(user: any) {
-    const payload = { username: user.username, sub: user.id };
-    return this.jwtService.sign(payload);
   }
 }

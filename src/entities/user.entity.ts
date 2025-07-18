@@ -23,6 +23,9 @@ export class User {
   @Property({ nullable: true })
   googleEmail?: string;
 
+  @Property({ nullable: true })
+  googlePicture?: string;
+
   @Property({ default: 'user' })
   role!: string;
 

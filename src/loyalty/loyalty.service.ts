@@ -26,12 +26,14 @@ export class LoyaltyService {
     stars: number;
     rewards: number;
     remainingToNext: number;
+    requiredStars: number;
   }> {
     const entries = await this.loyaltyRepo.find({ user: userId });
     const stars = entries.reduce((sum, e) => sum + e.points, 0);
-    const rewards = Math.floor(stars / 15);
-    const remainingToNext = 15 - (stars % 15);
+    const requiredStars = 15;
+    const rewards = Math.floor(stars / requiredStars);
+    const remainingToNext = requiredStars - (stars % requiredStars);
 
-    return { stars, rewards, remainingToNext };
+    return { stars, rewards, remainingToNext, requiredStars };
   }
 }

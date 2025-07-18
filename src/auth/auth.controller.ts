@@ -15,17 +15,26 @@ import axios from 'axios';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // Route to get Google OAuth URL (Works for Web & Mobile)
+  private getClientAndRedirect(isMobile: boolean) {
+    const clientId = isMobile
+      ? process.env.GOOGLE_CLIENT_ID_MOBILE
+      : process.env.GOOGLE_CLIENT_ID_WEB;
+
+    const redirectUri = isMobile
+      ? process.env.GOOGLE_CALLBACK_URL_MOBILE
+      : process.env.GOOGLE_CALLBACK_URL;
+
+    return { clientId, redirectUri };
+  }
+
+  // ✅ Generates Google login URL (web or Safari mobile)
   @Get('google')
   async googleAuth(@Req() req, @Res() res) {
     try {
-      const isMobile = req.query.mobile === 'true';
+      const isMobile = req.headers['mobile-auth'] === 'ios';
+      const { clientId, redirectUri } = this.getClientAndRedirect(isMobile);
 
-      const redirectUri = isMobile
-        ? process.env.GOOGLE_CALLBACK_URL_MOBILE
-        : process.env.GOOGLE_CALLBACK_URL;
-
-      const googleAuthUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=email profile`;
+      const googleAuthUrl = `https://accounts.google.com/o/oauth2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=email profile`;
 
       return res.json({ url: googleAuthUrl });
     } catch (error) {
@@ -35,7 +44,7 @@ export class AuthController {
     }
   }
 
-  // Callback for Google OAuth (Handles Web & Mobile)
+  // ✅ Handles Google redirect for web-based flow
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req, @Res() res) {
@@ -43,36 +52,26 @@ export class AuthController {
       const user = req.user;
       const token = await this.authService.generateToken(user);
 
-      const isMobile =
-        req.headers['user-agent']?.includes('Expo') ||
-        req.query.mobile === 'true';
+      const isMobile = req.headers['mobile-auth'] === 'ios';
+      const redirectUrl = isMobile
+        ? `coffeeclub://auth-callback?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`
+        : `http://localhost:5173?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`;
 
-      if (isMobile) {
-        return res.json({ token, user });
-      }
-
-      return res.redirect(
-        `http://localhost:5173?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`,
-      );
+      return res.redirect(redirectUrl);
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }
   }
 
-  // Token Exchange API (For Mobile Apps)
+  // ✅ Used in Safari flow (if app or frontend uses code exchange)
   @Post('google/token')
   async exchangeToken(@Body() body, @Res() res) {
     try {
       const { code, isMobile } = body;
+      const { clientId, redirectUri } = this.getClientAndRedirect(isMobile);
 
-      // Set correct redirect URI based on mobile or web
-      const redirectUri = isMobile
-        ? process.env.GOOGLE_CALLBACK_URL_MOBILE
-        : process.env.GOOGLE_CALLBACK_URL;
-
-      // Exchange the authorization code for an access token
       const response = await axios.post('https://oauth2.googleapis.com/token', {
-        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_id: clientId,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
         code,
         grant_type: 'authorization_code',
@@ -80,11 +79,7 @@ export class AuthController {
       });
 
       const { id_token } = response.data;
-
-      // Verify and extract user information
-      const user = await this.authService.verifyGoogleToken(id_token);
-
-      // Generate JWT token
+      const user = await this.authService.verifyGoogleToken(id_token, isMobile);
       const token = await this.authService.generateToken(user);
 
       return res.json({ token, user });
@@ -96,40 +91,28 @@ export class AuthController {
       return res.status(400).json({ error: 'Failed to exchange token' });
     }
   }
-}
 
-/*
-
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthGuard } from '@nestjs/passport';
-
-@Controller('auth')
-export class AuthController {
-  constructor(private readonly authService: AuthService) {}
-
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth() {}
-
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleAuthRedirect(@Req() req, @Res() res) {
+  // ✅ Native mobile login using GoogleSignIn SDK (idToken)
+  @Post('google/mobile')
+  async googleAuthMobile(@Body('token') token: string, @Req() req, @Res() res) {
     try {
-      const user = req.user;
-      const token = await this.authService.generateToken(user);
-      // Redirect to your React app with the token and user data
-      return res.redirect(
-        `http://localhost:5173?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`,
-      );
+      const isMobile = req.headers['mobile-auth'] === 'ios';
+      if (!isMobile) {
+        return res
+          .status(403)
+          .json({ error: 'Unauthorized: Only mobile requests allowed' });
+      }
+
+      const user = await this.authService.verifyGoogleToken(token, true);
+      const jwtToken = await this.authService.generateToken(user);
+
+      return res.json({ token: jwtToken, user });
     } catch (error) {
-      // Redirect with error
-      return res.redirect(
-        `http://localhost:5173?error=${encodeURIComponent(error.message)}`,
+      console.error(
+        'Mobile token auth error:',
+        error.response?.data || error.message,
       );
+      return res.status(400).json({ error: 'Failed to verify mobile token' });
     }
   }
 }
-
-
-*/

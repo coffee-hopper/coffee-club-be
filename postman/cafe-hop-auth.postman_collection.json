@@ -87,6 +87,59 @@
       ]
     },
     {
+      "name": "User",
+      "item": [
+        {
+          "name": "Update User Role (Admin Only)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/1/role",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "1", "role"]
+            },
+            "description": "Update a user's role to admin/barista/user. Must be an admin to use this endpoint."
+          }
+        },
+        {
+          "name": "Get JWT Token (Google)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"<YOUR_GOOGLE_ID_TOKEN>\",\n  \"isMobile\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/google/mobile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "google", "mobile"]
+            },
+            "description": "Send Google ID token to receive backend JWT token. Copy `access_token` to `{{authToken}}` Postman variable."
+          }
+        }
+      ]
+    },
+    {
       "name": "Product",
       "item": [
         {
@@ -101,7 +154,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Flat White\",\n  \"category\": \"drink\",\n  \"description\": \"Creamy coffee with milk\",\n  \"price\": 7,\n  \"stockQuantity\": 50\n}"
+              "raw": "{\n  \"name\": \"Flat White\",\n  \"category\": \"coffee\",\n  \"description\": \"Creamy coffee with milk\",\n  \"price\": 7,\n  \"stockQuantity\": 50\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/products",
@@ -122,6 +175,56 @@
               "path": ["products"]
             },
             "description": "Retrieve all products"
+          }
+        },
+        {
+          "name": "Update Product by ID",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Product\",\n  \"price\": 10,\n  \"stockQuantity\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "1"]
+            },
+            "description": "✅ Update product details (admin only)"
+          }
+        },
+        {
+          "name": "Delete Product by ID",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "1"]
+            },
+            "description": "🗑️ Delete a specific product (admin only)"
+          }
+        },
+        {
+          "name": "Delete All Products",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            },
+            "description": "💣 Delete all products (admin only)"
           }
         }
       ]
@@ -162,6 +265,28 @@
               "path": ["orders"]
             },
             "description": "Fetch all orders with items and user"
+          }
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            },
+            "description": "Cancel an existing order by ID"
           }
         }
       ]

@@ -45,15 +45,13 @@ export class PaymentService {
 
       // Loyalty: 1 star per drink item
       for (const item of orderItems) {
-        if (item.product.category === 'drink') {
-          const loyalty = this.loyaltyRepo.create({
-            user: order.user,
-            product: item.product,
-            points: item.quantity,
-            note: `Earned from payment ${payment.id}`,
-          });
-          await this.em.persist(loyalty);
-        }
+        const loyalty = this.loyaltyRepo.create({
+          user: order.user,
+          product: item.product,
+          points: item.quantity,
+          note: `Earned from payment ${payment.id}`,
+        });
+        await this.em.persist(loyalty);
       }
 
       // Fetch total stars after applying all new ones
