@@ -7,13 +7,17 @@ import {
   Body,
   UseGuards,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import axios from 'axios';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   private getClientAndRedirect(isMobile: boolean) {
     const clientId = isMobile
@@ -51,11 +55,13 @@ export class AuthController {
     try {
       const user = req.user;
       const token = await this.authService.generateToken(user);
+      const decoded = this.jwtService.decode(token) as { exp?: number } | null;
+      const exp = decoded?.exp ?? null;
 
       const isMobile = req.headers['mobile-auth'] === 'ios';
       const redirectUrl = isMobile
-        ? `coffeeclub://auth-callback?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`
-        : `http://localhost:5173?token=${token}&user=${encodeURIComponent(JSON.stringify(user))}`;
+        ? `coffeeclub://auth-callback?token=${token}&exp=${exp}&user=${encodeURIComponent(JSON.stringify(user))}`
+        : `http://localhost:5173?token=${token}&exp=${exp}&user=${encodeURIComponent(JSON.stringify(user))}`;
 
       return res.redirect(redirectUrl);
     } catch (error) {
@@ -82,7 +88,11 @@ export class AuthController {
       const user = await this.authService.verifyGoogleToken(id_token, isMobile);
       const token = await this.authService.generateToken(user);
 
-      return res.json({ token, user });
+      const decoded = this.jwtService.decode(token) as { exp?: number } | null;
+      const exp = decoded?.exp ?? null;
+      const expiresAt = exp ? new Date(exp * 1000).toISOString() : null;
+
+      return res.json({ token, exp, expiresAt, user });
     } catch (error) {
       console.error(
         'Token exchange error:',
@@ -106,7 +116,13 @@ export class AuthController {
       const user = await this.authService.verifyGoogleToken(token, true);
       const jwtToken = await this.authService.generateToken(user);
 
-      return res.json({ token: jwtToken, user });
+      const decoded = this.jwtService.decode(jwtToken) as {
+        exp?: number;
+      } | null;
+      const exp = decoded?.exp ?? null;
+      const expiresAt = exp ? new Date(exp * 1000).toISOString() : null;
+
+      return res.json({ token: jwtToken, exp, expiresAt, user });
     } catch (error) {
       console.error(
         'Mobile token auth error:',
