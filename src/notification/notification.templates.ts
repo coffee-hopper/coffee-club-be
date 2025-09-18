@@ -33,7 +33,7 @@ export const TEMPLATES: Record<NotificationCode, TemplateShape> = {
   [NotificationCode.ORDER_PURCHASED]: {
     type: 'order',
     title: () => 'Purchase confirmed — enjoy!',
-    body: (ctx) => `You spent ${ctx.total} TL for ${ctx.count} item(s).`,
+    body: (ctx) => `You spent ${ctx.total} TL and earned ${ctx.count} stars.`,
     defaultMetadata: { route: 'orderDetail' },
   },
 

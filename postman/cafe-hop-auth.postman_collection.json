@@ -116,15 +116,10 @@
           }
         },
         {
-          "name": "Get JWT Token (Google)",
+          "name": "Get JWT Token (Google Mobile)",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"idToken\": \"<YOUR_GOOGLE_ID_TOKEN>\",\n  \"isMobile\": true\n}"
@@ -134,7 +129,24 @@
               "host": ["{{baseUrl}}"],
               "path": ["auth", "google", "mobile"]
             },
-            "description": "Send Google ID token to receive backend JWT token. Copy `access_token` to `{{authToken}}` Postman variable."
+            "description": "Send Google ID token (from iOS/Android app) to get backend JWT. Copy `token` to {{authToken}}"
+          }
+        },
+        {
+          "name": "Get JWT Token (Google Web)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"<YOUR_GOOGLE_ID_TOKEN>\",\n  \"isMobile\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/google/mobile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "google", "mobile"]
+            },
+            "description": "Send Google ID token (from web flow, client ID {{GOOGLE_CLIENT_ID_WEB}}) to get backend JWT. Copy `token` to {{authToken}}"
           }
         }
       ]
@@ -454,6 +466,206 @@
           }
         }
       ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "unread-count"]
+            },
+            "description": "Returns { count: number } for the authenticated user"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "const data = pm.response.json();",
+                  "pm.expect(data).to.have.property('count');",
+                  "pm.collectionVariables.set('lastUnreadCount', data.count);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List (All)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?limit={{notifLimit}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"],
+              "query": [{ "key": "limit", "value": "{{notifLimit}}" }]
+            },
+            "description": "Returns { items: Notification[], nextAfterId?: number } (most recent first)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "const data = pm.response.json();",
+                  "pm.expect(data).to.have.property('items');",
+                  "if (data.items && data.items.length) {",
+                  "  pm.collectionVariables.set('lastNotificationId', data.items[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List (Unread only)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?limit={{notifLimit}}&unread=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"],
+              "query": [
+                { "key": "limit", "value": "{{notifLimit}}" },
+                { "key": "unread", "value": "true" }
+              ]
+            },
+            "description": "Same shape but only unread items"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "const data = pm.response.json();",
+                  "pm.expect(data).to.have.property('items');",
+                  "if (data.items && data.items.length) {",
+                  "  pm.collectionVariables.set('lastNotificationId', data.items[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mark Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [{{lastNotificationId}}]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "read"]
+            },
+            "description": "Marks the specific notification(s) as read"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "const data = pm.response.json();",
+                  "pm.expect(data).to.have.property('updated');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mark Unread",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [{{lastNotificationId}}]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "unread"]
+            },
+            "description": "Marks the specific notification(s) as unread"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "const data = pm.response.json();",
+                  "pm.expect(data).to.have.property('updated');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Notifications",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [{{lastNotificationId}}]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"]
+            },
+            "description": "Deletes the specified notification(s)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', function () { pm.response.to.have.status(200); });",
+                  "const data = pm.response.json();",
+                  "pm.expect(data).to.have.property('deleted');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "event": [
@@ -477,6 +689,10 @@
       "key": "baseUrl",
       "value": "http://localhost:3000",
       "type": "string"
-    }
+    },
+    { "key": "authToken", "value": "", "type": "string" },
+    { "key": "notifLimit", "value": "50", "type": "string" },
+    { "key": "lastNotificationId", "value": "", "type": "string" },
+    { "key": "lastUnreadCount", "value": "", "type": "string" }
   ]
 }

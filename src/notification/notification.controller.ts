@@ -7,13 +7,16 @@ import {
   Query,
   Req,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
+import { AuthGuard } from '@nestjs/passport';
 
 interface IdsBodyDto {
   ids?: number[];
 }
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('notifications')
 export class NotificationController {
   constructor(private readonly svc: NotificationService) {}
