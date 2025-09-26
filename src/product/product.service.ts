@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { EntityRepository, EntityManager } from '@mikro-orm/core';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { EntityRepository, EntityManager, FilterQuery } from '@mikro-orm/core';
 import { InjectRepository } from '@mikro-orm/nestjs';
 
 import { Product } from 'src/entities/product.entity';
@@ -7,6 +7,7 @@ import {
   PRODUCT_CATEGORIES,
   ProductCategory,
 } from 'src/constants/product-category';
+import type { ProductListOpts } from './product.types';
 
 @Injectable()
 export class ProductService {
@@ -21,6 +22,12 @@ export class ProductService {
       return this.productRepo.find({ category: category as ProductCategory });
     }
     return this.productRepo.findAll();
+  }
+
+  async findOne(id: number): Promise<Product> {
+    const product = await this.productRepo.findOne({ id });
+    if (!product) throw new NotFoundException('Product not found');
+    return product;
   }
 
   async create(data: Partial<Product>): Promise<Product> {
@@ -42,6 +49,38 @@ export class ProductService {
     this.productRepo.assign(product, data);
     await this.em.persistAndFlush(product);
     return product;
+  }
+
+  async list(opts: ProductListOpts = {}) {
+    const {
+      q,
+      category,
+      inStock,
+      offset = 0,
+      limit = 50,
+      sort = 'name',
+      order = 'asc',
+    } = opts;
+
+    const where: FilterQuery<Product> = {};
+
+    if (q && q.trim()) {
+      where.name = { $ilike: `%${q.trim()}%` };
+    }
+    if (category) {
+      where.category = category;
+    }
+    if (typeof inStock === 'boolean') {
+      where.stockQuantity = inStock ? { $gt: 0 } : { $gte: 0 };
+    }
+
+    const [items] = await this.productRepo.findAndCount(where, {
+      limit: Math.min(Math.max(limit, 1), 100),
+      offset: Math.max(offset, 0),
+      orderBy: { [sort]: order },
+    });
+
+    return items;
   }
 
   async delete(id: number): Promise<boolean> {
